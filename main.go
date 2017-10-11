@@ -223,11 +223,9 @@ func (nn *neuralNet) train(x, y *mat.Dense) error {
 	randSource := rand.NewSource(time.Now().UnixNano())
 	randGen := rand.New(randSource)
 
-	wHiddenRaw := make([]float64,
-		nn.config.hiddenNeurons*nn.config.inputNeurons)
+	wHiddenRaw := make([]float64, nn.config.hiddenNeurons*nn.config.inputNeurons)
 	bHiddenRaw := make([]float64, nn.config.hiddenNeurons)
-	wOutRaw := make([]float64,
-		nn.config.outputNeurons*nn.config.hiddenNeurons)
+	wOutRaw := make([]float64, nn.config.outputNeurons*nn.config.hiddenNeurons)
 	bOutRaw := make([]float64, nn.config.outputNeurons)
 
 	for _, param := range [][]float64{
@@ -241,11 +239,9 @@ func (nn *neuralNet) train(x, y *mat.Dense) error {
 		}
 	}
 
-	wHidden := mat.NewDense(nn.config.inputNeurons,
-		nn.config.hiddenNeurons, wHiddenRaw)
+	wHidden := mat.NewDense(nn.config.inputNeurons, nn.config.hiddenNeurons, wHiddenRaw)
 	bHidden := mat.NewDense(1, nn.config.hiddenNeurons, bHiddenRaw)
-	wOut := mat.NewDense(nn.config.hiddenNeurons,
-		nn.config.outputNeurons, wOutRaw)
+	wOut := mat.NewDense(nn.config.hiddenNeurons, nn.config.outputNeurons, wOutRaw)
 	bOut := mat.NewDense(1, nn.config.outputNeurons, bOutRaw)
 
 	// Define the output of the neural network.
@@ -275,22 +271,16 @@ func (nn *neuralNet) backpropagate(x, y, wHidden, bHidden, wOut, bOut, output *m
 		// Complete the feed forward process.
 		hiddenLayerInput := mat.NewDense(0, 0, nil)
 		hiddenLayerInput.Mul(x, wHidden)
-		addBHidden := func(_, col int, v float64) float64 {
-			return v + bHidden.At(0, col)
-		}
+		addBHidden := func(_, col int, v float64) float64 { return v + bHidden.At(0, col) }
 		hiddenLayerInput.Apply(addBHidden, hiddenLayerInput)
 
 		hiddenLayerActivations := mat.NewDense(0, 0, nil)
-		applySigmoid := func(_, _ int, v float64) float64 {
-			return sigmoid(v)
-		}
+		applySigmoid := func(_, _ int, v float64) float64 { return sigmoid(v) }
 		hiddenLayerActivations.Apply(applySigmoid, hiddenLayerInput)
 
 		outputLayerInput := mat.NewDense(0, 0, nil)
 		outputLayerInput.Mul(hiddenLayerActivations, wOut)
-		addBOut := func(_, col int, v float64) float64 {
-			return v + bOut.At(0, col)
-		}
+		addBOut := func(_, col int, v float64) float64 { return v + bOut.At(0, col) }
 		outputLayerInput.Apply(addBOut, outputLayerInput)
 		output.Apply(applySigmoid, outputLayerInput)
 
@@ -299,13 +289,10 @@ func (nn *neuralNet) backpropagate(x, y, wHidden, bHidden, wOut, bOut, output *m
 		networkError.Sub(y, output)
 
 		slopeOutputLayer := mat.NewDense(0, 0, nil)
-		applySigmoidPrime := func(_, _ int, v float64) float64 {
-			return sigmoidPrime(v)
-		}
+		applySigmoidPrime := func(_, _ int, v float64) float64 { return sigmoidPrime(v) }
 		slopeOutputLayer.Apply(applySigmoidPrime, output)
 		slopeHiddenLayer := mat.NewDense(0, 0, nil)
-		slopeHiddenLayer.Apply(applySigmoidPrime,
-			hiddenLayerActivations)
+		slopeHiddenLayer.Apply(applySigmoidPrime, hiddenLayerActivations)
 
 		dOutput := mat.NewDense(0, 0, nil)
 		dOutput.MulElem(networkError, slopeOutputLayer)
@@ -363,22 +350,16 @@ func (nn *neuralNet) predict(x *mat.Dense) (*mat.Dense, error) {
 	// Complete the feed forward process.
 	hiddenLayerInput := mat.NewDense(0, 0, nil)
 	hiddenLayerInput.Mul(x, nn.wHidden)
-	addBHidden := func(_, col int, v float64) float64 {
-		return v + nn.bHidden.At(0, col)
-	}
+	addBHidden := func(_, col int, v float64) float64 { return v + nn.bHidden.At(0, col) }
 	hiddenLayerInput.Apply(addBHidden, hiddenLayerInput)
 
 	hiddenLayerActivations := mat.NewDense(0, 0, nil)
-	applySigmoid := func(_, _ int, v float64) float64 {
-		return sigmoid(v)
-	}
+	applySigmoid := func(_, _ int, v float64) float64 { return sigmoid(v) }
 	hiddenLayerActivations.Apply(applySigmoid, hiddenLayerInput)
 
 	outputLayerInput := mat.NewDense(0, 0, nil)
 	outputLayerInput.Mul(hiddenLayerActivations, nn.wOut)
-	addBOut := func(_, col int, v float64) float64 {
-		return v + nn.bOut.At(0, col)
-	}
+	addBOut := func(_, col int, v float64) float64 { return v + nn.bOut.At(0, col) }
 	outputLayerInput.Apply(addBOut, outputLayerInput)
 	output.Apply(applySigmoid, outputLayerInput)
 
