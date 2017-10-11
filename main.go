@@ -223,10 +223,15 @@ func (nn *neuralNet) train(x, y *mat.Dense) error {
 	randSource := rand.NewSource(time.Now().UnixNano())
 	randGen := rand.New(randSource)
 
-	wHiddenRaw := make([]float64, nn.config.hiddenNeurons*nn.config.inputNeurons)
-	bHiddenRaw := make([]float64, nn.config.hiddenNeurons)
-	wOutRaw := make([]float64, nn.config.outputNeurons*nn.config.hiddenNeurons)
-	bOutRaw := make([]float64, nn.config.outputNeurons)
+	wHidden := mat.NewDense(nn.config.inputNeurons, nn.config.hiddenNeurons, nil)
+	bHidden := mat.NewDense(1, nn.config.hiddenNeurons, nil)
+	wOut := mat.NewDense(nn.config.hiddenNeurons, nn.config.outputNeurons, nil)
+	bOut := mat.NewDense(1, nn.config.outputNeurons, nil)
+
+	wHiddenRaw := wHidden.RawMatrix().Data
+	bHiddenRaw := bHidden.RawMatrix().Data
+	wOutRaw := wOut.RawMatrix().Data
+	bOutRaw := bOut.RawMatrix().Data
 
 	for _, param := range [][]float64{
 		wHiddenRaw,
@@ -238,11 +243,6 @@ func (nn *neuralNet) train(x, y *mat.Dense) error {
 			param[i] = randGen.Float64()
 		}
 	}
-
-	wHidden := mat.NewDense(nn.config.inputNeurons, nn.config.hiddenNeurons, wHiddenRaw)
-	bHidden := mat.NewDense(1, nn.config.hiddenNeurons, bHiddenRaw)
-	wOut := mat.NewDense(nn.config.hiddenNeurons, nn.config.outputNeurons, wOutRaw)
-	bOut := mat.NewDense(1, nn.config.outputNeurons, bOutRaw)
 
 	// Define the output of the neural network.
 	output := mat.NewDense(0, 0, nil)
