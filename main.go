@@ -245,7 +245,7 @@ func (nn *neuralNet) train(x, y *mat.Dense) error {
 	}
 
 	// Define the output of the neural network.
-	output := mat.NewDense(0, 0, nil)
+	output := new(mat.Dense)
 
 	// Use backpropagation to adjust the weights and biases.
 	if err := nn.backpropagate(x, y, wHidden, bHidden, wOut, bOut, output); err != nil {
@@ -269,41 +269,41 @@ func (nn *neuralNet) backpropagate(x, y, wHidden, bHidden, wOut, bOut, output *m
 	for i := 0; i < nn.config.numEpochs; i++ {
 
 		// Complete the feed forward process.
-		hiddenLayerInput := mat.NewDense(0, 0, nil)
+		hiddenLayerInput := new(mat.Dense)
 		hiddenLayerInput.Mul(x, wHidden)
 		addBHidden := func(_, col int, v float64) float64 { return v + bHidden.At(0, col) }
 		hiddenLayerInput.Apply(addBHidden, hiddenLayerInput)
 
-		hiddenLayerActivations := mat.NewDense(0, 0, nil)
+		hiddenLayerActivations := new(mat.Dense)
 		applySigmoid := func(_, _ int, v float64) float64 { return sigmoid(v) }
 		hiddenLayerActivations.Apply(applySigmoid, hiddenLayerInput)
 
-		outputLayerInput := mat.NewDense(0, 0, nil)
+		outputLayerInput := new(mat.Dense)
 		outputLayerInput.Mul(hiddenLayerActivations, wOut)
 		addBOut := func(_, col int, v float64) float64 { return v + bOut.At(0, col) }
 		outputLayerInput.Apply(addBOut, outputLayerInput)
 		output.Apply(applySigmoid, outputLayerInput)
 
 		// Complete the backpropagation.
-		networkError := mat.NewDense(0, 0, nil)
+		networkError := new(mat.Dense)
 		networkError.Sub(y, output)
 
-		slopeOutputLayer := mat.NewDense(0, 0, nil)
+		slopeOutputLayer := new(mat.Dense)
 		applySigmoidPrime := func(_, _ int, v float64) float64 { return sigmoidPrime(v) }
 		slopeOutputLayer.Apply(applySigmoidPrime, output)
-		slopeHiddenLayer := mat.NewDense(0, 0, nil)
+		slopeHiddenLayer := new(mat.Dense)
 		slopeHiddenLayer.Apply(applySigmoidPrime, hiddenLayerActivations)
 
-		dOutput := mat.NewDense(0, 0, nil)
+		dOutput := new(mat.Dense)
 		dOutput.MulElem(networkError, slopeOutputLayer)
-		errorAtHiddenLayer := mat.NewDense(0, 0, nil)
+		errorAtHiddenLayer := new(mat.Dense)
 		errorAtHiddenLayer.Mul(dOutput, wOut.T())
 
-		dHiddenLayer := mat.NewDense(0, 0, nil)
+		dHiddenLayer := new(mat.Dense)
 		dHiddenLayer.MulElem(errorAtHiddenLayer, slopeHiddenLayer)
 
 		// Adjust the parameters.
-		wOutAdj := mat.NewDense(0, 0, nil)
+		wOutAdj := new(mat.Dense)
 		wOutAdj.Mul(hiddenLayerActivations.T(), dOutput)
 		wOutAdj.Scale(nn.config.learningRate, wOutAdj)
 		wOut.Add(wOut, wOutAdj)
@@ -315,7 +315,7 @@ func (nn *neuralNet) backpropagate(x, y, wHidden, bHidden, wOut, bOut, output *m
 		bOutAdj.Scale(nn.config.learningRate, bOutAdj)
 		bOut.Add(bOut, bOutAdj)
 
-		wHiddenAdj := mat.NewDense(0, 0, nil)
+		wHiddenAdj := new(mat.Dense)
 		wHiddenAdj.Mul(x.T(), dHiddenLayer)
 		wHiddenAdj.Scale(nn.config.learningRate, wHiddenAdj)
 		wHidden.Add(wHidden, wHiddenAdj)
@@ -345,19 +345,19 @@ func (nn *neuralNet) predict(x *mat.Dense) (*mat.Dense, error) {
 	}
 
 	// Define the output of the neural network.
-	output := mat.NewDense(0, 0, nil)
+	output := new(mat.Dense)
 
 	// Complete the feed forward process.
-	hiddenLayerInput := mat.NewDense(0, 0, nil)
+	hiddenLayerInput := new(mat.Dense)
 	hiddenLayerInput.Mul(x, nn.wHidden)
 	addBHidden := func(_, col int, v float64) float64 { return v + nn.bHidden.At(0, col) }
 	hiddenLayerInput.Apply(addBHidden, hiddenLayerInput)
 
-	hiddenLayerActivations := mat.NewDense(0, 0, nil)
+	hiddenLayerActivations := new(mat.Dense)
 	applySigmoid := func(_, _ int, v float64) float64 { return sigmoid(v) }
 	hiddenLayerActivations.Apply(applySigmoid, hiddenLayerInput)
 
-	outputLayerInput := mat.NewDense(0, 0, nil)
+	outputLayerInput := new(mat.Dense)
 	outputLayerInput.Mul(hiddenLayerActivations, nn.wOut)
 	addBOut := func(_, col int, v float64) float64 { return v + nn.bOut.At(0, col) }
 	outputLayerInput.Apply(addBOut, outputLayerInput)
