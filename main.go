@@ -251,6 +251,23 @@ func (nn *neuralNet) train(x, y *mat.Dense) error {
 	// Define the output of the neural network.
 	output := mat.NewDense(0, 0, nil)
 
+	// Use backpropagation to adjust the weights and biases.
+	if err := nn.backpropagate(x, y, wHidden, bHidden, wOut, bOut, output); err != nil {
+		return err
+	}
+
+	// Define our trained neural network.
+	nn.wHidden = wHidden
+	nn.bHidden = bHidden
+	nn.wOut = wOut
+	nn.bOut = bOut
+
+	return nil
+}
+
+// backpropagate completes the backpropagation method.
+func (nn *neuralNet) backpropagate(x, y, wHidden, bHidden, wOut, bOut, output *mat.Dense) error {
+
 	// Loop over the number of epochs utilizing
 	// backpropagation to train our model.
 	for i := 0; i < nn.config.numEpochs; i++ {
@@ -323,12 +340,6 @@ func (nn *neuralNet) train(x, y *mat.Dense) error {
 		bHiddenAdj.Scale(nn.config.learningRate, bHiddenAdj)
 		bHidden.Add(bHidden, bHiddenAdj)
 	}
-
-	// Define our trained neural network.
-	nn.wHidden = wHidden
-	nn.bHidden = bHidden
-	nn.wOut = wOut
-	nn.bOut = bOut
 
 	return nil
 }
