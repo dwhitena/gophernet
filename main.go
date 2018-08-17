@@ -256,7 +256,7 @@ func sigmoid(x float64) float64 {
 // sigmoidPrime implements the derivative
 // of the sigmoid function for backpropagation.
 func sigmoidPrime(x float64) float64 {
-	return x * (1.0 - x)
+	return sigmoid(x) * (1.0 - sigmoid(x))
 }
 
 // sumAlongAxis sums a matrix along a
